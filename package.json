@@ -1,0 +1,16 @@
+{
+  "name": "soa-express-graduation-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demo giữa kỳ Express.js: quản lý đồ án với ba dịch vụ HTTP và SQLite",
+  "type": "module",
+  "engines": { "node": ">=22.13.0" },
+  "scripts": {
+    "start": "node src/start.js",
+    "start:sinhvien": "node src/sinhvien.js",
+    "start:detai": "node src/detai.js",
+    "start:dangky": "node src/dangky.js",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": { "express": "^5.1.0" }
+}
