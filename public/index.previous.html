@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="vi">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo quản lý đồ án</title>
+<style>
+  body{font:15px Arial,sans-serif;max-width:1000px;margin:30px auto;padding:0 16px;color:#222}
+  h1{font-size:25px}h2{font-size:19px}section{border:1px solid #ccc;padding:18px;margin:20px 0}
+  form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}input,button{font:inherit;padding:8px}input{max-width:230px}
+  button{cursor:pointer}table{border-collapse:collapse;width:100%;margin-top:16px;font-size:13px}
+  th,td{border:1px solid #ddd;text-align:left;padding:8px;overflow-wrap:anywhere}th{background:#f4f4f4}
+  td button{padding:4px 7px;margin:2px;font-size:12px}pre{background:#f4f4f4;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+  #message{white-space:pre-wrap}.table-wrap{overflow:auto}label{display:flex;flex-direction:column;gap:5px;font-size:13px}
+</style>
+<h1>Demo Express.js — Quản lý đồ án tốt nghiệp</h1>
+<p>Ba dịch vụ: Sinh viên (3001), Đề tài (3002), Đăng ký (3003).</p>
+<button id="refresh">Tải lại danh sách</button>
+<p id="message" role="status"></p>
+<section>
+  <h2>1. Sinh viên</h2>
+  <form id="sinhvien-form">
+    <label>Mã sinh viên<input name="maSV" required></label>
+    <label>Họ tên<input name="hoTen" required></label>
+    <label>Lớp<input name="lop" required></label>
+    <button>Lưu</button><button type="button" class="cancel">Hủy sửa</button>
+  </form>
+  <div class="table-wrap"><table id="sinhvien-table"></table></div>
+</section>
+<section>
+  <h2>2. Đề tài</h2>
+  <form id="detai-form">
+    <label>Mã đề tài<input name="maDT" required></label>
+    <label>Tên đề tài<input name="tenDeTai" required></label>
+    <label>Mô tả<input name="moTa"></label>
+    <button>Lưu</button><button type="button" class="cancel">Hủy sửa</button>
+  </form>
+  <div class="table-wrap"><table id="detai-table"></table></div>
+</section>
+<section>
+  <h2>3. Đăng ký đề tài</h2>
+  <form id="dangky-form">
+    <label>Mã sinh viên<input name="maSV" required></label>
+    <label>Mã đề tài<input name="maDT" required></label>
+    <button>Lưu</button><button type="button" class="cancel">Hủy sửa</button>
+  </form>
+
+  <div class="table-wrap"><table id="dangky-table"></table></div>
+</section>
+<h2>Kết quả gọi API gần nhất</h2>
+<pre id="result">Chưa có thao tác.</pre>
+<script>
+  const ports = { sinhvien: 3001, detai: 3002, dangky: 3003 };
+  const fields = { sinhvien: ['maSV','hoTen','lop'], detai: ['maDT','tenDeTai','moTa'], dangky: ['maDK','maSV','maDT','ngayDangKy'] };
+  const columnNames = { maSV: 'Mã SV', hoTen: 'Họ tên', lop: 'Lớp', maDT: 'Mã đề tài', tenDeTai: 'Tên đề tài', moTa: 'Mô tả', maDK: 'Mã đăng ký', ngayDangKy: 'Ngày đăng ký' };
+  const editing = {};
+  const message = text => { document.querySelector('#message').textContent = text; };
+  async function call(name, method = 'GET', id = '', body, show = true) {
+    const url = `http://127.0.0.1:${ports[name]}/${name}${id ? '/' + encodeURIComponent(id) : ''}`;
+    const response = await fetch(url, { method, headers: body ? {'Content-Type':'application/json'} : {}, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(5000) });
+    const data = response.status === 204 ? null : await response.json();
+    if (show) document.querySelector('#result').textContent = `${method} ${url}\nHTTP ${response.status}\n${body ? 'Gửi: ' + JSON.stringify(body) + '\n' : ''}${JSON.stringify(data, null, 2)}`;
+    if (!response.ok) throw new Error(data.error);
+    return data;
+  }
+  function reset(name) {
+    editing[name] = null;
+    const form = document.getElementById(name + '-form');
+    form.reset();
+    Array.from(form.elements).forEach(input => { input.disabled = false; });
+  }
+  async function load() {
+    const errors = [];
+    for (const name of Object.keys(ports)) {
+      const table = document.getElementById(name + '-table'); table.replaceChildren();
+      try {
+        const rows = await call(name, 'GET', '', undefined, false);
+        const header = table.insertRow();
+        [...fields[name], 'Thao tác'].forEach(field => { const th = document.createElement('th'); th.textContent = columnNames[field] || field; header.append(th); });
+        for (const item of rows) {
+          const row = table.insertRow(); fields[name].forEach(field => { row.insertCell().textContent = item[field]; });
+          const actions = row.insertCell(), id = item[fields[name][0]];
+          for (const label of ['Xem', 'Sửa', 'Xóa']) {
+            const button = document.createElement('button'); button.textContent = label;
+            button.onclick = async () => {
+              try {
+                if (label === 'Xem') await call(name, 'GET', id);
+                if (label === 'Sửa') {
+                  editing[name] = id;
+                  const form = document.getElementById(name + '-form');
+                  Array.from(form.elements).filter(input => input.name).forEach(input => { input.value = item[input.name]; input.disabled = name !== 'dangky' && input.name === fields[name][0]; });
+                  form.scrollIntoView({ block: 'center', behavior: 'smooth' }); message('Đang sửa ' + id + '.');
+                }
+                if (label === 'Xóa' && confirm('Xóa ' + id + '? Hãy xóa đăng ký liên quan trước khi xóa sinh viên/đề tài.')) {
+                  await call(name, 'DELETE', id);
+                  if (editing[name] === id) reset(name);
+                  await load(); message('Đã xóa ' + id + '.');
+                }
+              } catch (error) { message('Lỗi: ' + error.message); }
+            };
+            actions.append(button);
+          }
+        }
+        if (!rows.length) table.insertRow().insertCell().textContent = 'Chưa có dữ liệu.';
+      } catch { errors.push(name); table.insertRow().insertCell().textContent = 'Dịch vụ không kết nối được.'; }
+    }
+    if (errors.length) message('Không kết nối được: ' + errors.join(', '));
+  }
+  for (const name of Object.keys(ports)) {
+    const form = document.getElementById(name + '-form');
+    form.onsubmit = async event => {
+      event.preventDefault();
+      const buttons = form.querySelectorAll('button'); buttons.forEach(button => { button.disabled = true; });
+      try {
+        await call(name, editing[name] ? 'PUT' : 'POST', editing[name] || '', Object.fromEntries(new FormData(form)));
+        reset(name); await load(); message('Lưu thành công.');
+      } catch (error) { message('Lỗi: ' + error.message); }
+      finally { buttons.forEach(button => { button.disabled = false; }); }
+    };
+    form.querySelector('.cancel').onclick = () => { reset(name); message(''); };
+  }
+  document.querySelector('#refresh').onclick = () => { message(''); load(); };
+  load();
+</script>
+</html>
