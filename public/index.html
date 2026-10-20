@@ -1,10 +1,94 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Đồ án · SOA Workspace</title><link rel="icon" href="/favicon.svg"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/styles.css"><script src="/app.js" defer></script></head><body>
-<div id="nav-backdrop" hidden></div><aside id="sidebar"><a class="brand" href="/"><span class="brand-mark" data-icon="cap"></span>Đồ án</a><nav aria-label="Điều hướng"><button data-view="overview" class="active" aria-current="page"><span data-icon="dashboard"></span>Tổng quan</button><button data-view="sinhvien"><span data-icon="users"></span>Sinh viên</button><button data-view="detai"><span data-icon="book"></span>Đề tài</button><button data-view="dangky"><span data-icon="link"></span>Đăng ký</button><button data-view="architecture"><span data-icon="network"></span>Kiến trúc dịch vụ</button></nav></aside>
-<main><header><button id="menu-toggle" class="icon-button" aria-label="Mở điều hướng" aria-expanded="false" aria-controls="sidebar"><span data-icon="menu"></span></button><span class="header-title">Quản lý đồ án tốt nghiệp</span><span class="avatar" aria-label="Quản trị">QT</span></header><div class="content"><div class="heading"><div><h1 id="title">Tổng quan</h1><p id="subtitle" class="muted">Theo dõi sinh viên, đề tài và đăng ký tại một nơi.</p></div><button id="refresh"><span data-icon="refresh"></span>Làm mới dữ liệu</button></div><div id="message" role="status" aria-live="polite"></div>
-<section id="overview-view"><div class="stats" id="stats"></div><div class="panel"><div class="panel-head"><h2>Đăng ký gần đây</h2><button class="text-button" data-view="dangky">Xem tất cả <span data-icon="arrow"></span></button></div><div id="recent"></div></div></section>
-<section id="manager" class="manager-grid" hidden><div class="panel records-panel"><div class="toolbar"><h2 id="list-title">Danh sách</h2><div class="search-box"><span data-icon="search"></span><input id="search" type="search" placeholder="Tìm trong danh sách" aria-label="Tìm kiếm"></div></div><div id="table" aria-live="polite"></div><div id="list-count" class="list-count"></div></div><div class="panel detail-panel"><section id="record-detail" aria-label="Chi tiết bản ghi"></section><div class="editor"><h2 id="form-title">Thêm mới</h2><form id="entity-form"></form></div></div></section>
-<section id="architecture-view" hidden><div class="panel architecture"><div class="panel-head"><h2>Client → API Gateway → Dịch vụ → SQLite</h2></div><div class="gateway"><strong>Giao diện web & API Gateway</strong><small>:3000 · /api/:service</small></div><div class="service-grid" id="services"></div><p class="architecture-note muted">Đăng ký xác thực sinh viên và đề tài qua HTTP. Mỗi dịch vụ sở hữu một cơ sở dữ liệu riêng.</p></div></section>
-<details class="panel api"><summary>Nhật ký API <span class="muted">Yêu cầu và phản hồi qua Gateway</span></summary><pre id="result">Chưa có thao tác. Chọn một bản ghi để xem phản hồi API.</pre></details></div></main>
-<dialog id="delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-description"><form method="dialog"><div class="dialog-heading"><span class="delete-icon" data-icon="trash"></span><h2 id="delete-title">Xóa bản ghi?</h2></div><p id="delete-description"></p><div class="dialog-actions"><button value="cancel" autofocus>Hủy</button><button value="delete" class="danger">Xóa bản ghi</button></div></form></dialog></body></html>
+<!doctype html>
+<html lang="vi">
 
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Đồ án · SOA Workspace</title>
+    <link rel="icon" href="/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+</head>
 
+<body>
+    <div id="nav-backdrop" hidden></div>
+    <aside id="sidebar"><a class="brand" href="/"><span class="brand-mark" data-icon="cap"></span>Đồ án</a>
+        <nav aria-label="Điều hướng"><button data-view="overview" class="active" aria-current="page"><span
+                    data-icon="dashboard"></span>Tổng quan</button><button data-view="sinhvien"><span
+                    data-icon="users"></span>Sinh viên</button><button data-view="detai"><span
+                    data-icon="book"></span>Đề tài</button><button data-view="dangky"><span data-icon="link"></span>Đăng
+                ký</button><button data-view="architecture"><span data-icon="network"></span>Kiến trúc dịch vụ</button>
+        </nav>
+    </aside>
+    <main>
+        <header><button id="menu-toggle" class="icon-button" aria-label="Mở điều hướng" aria-expanded="false"
+                aria-controls="sidebar"><span data-icon="menu"></span></button><span class="header-title">Quản lý đồ án
+                tốt nghiệp</span><span class="avatar" aria-label="Quản trị">QT</span></header>
+        <div class="content">
+            <div class="heading">
+                <div>
+                    <h1 id="title">Tổng quan</h1>
+                    <p id="subtitle" class="muted">Theo dõi sinh viên, đề tài và đăng ký tại một nơi.</p>
+                </div><button id="refresh"><span data-icon="refresh"></span>Làm mới dữ liệu</button>
+            </div>
+            <div id="message" role="status" aria-live="polite"></div>
+            <section id="overview-view">
+                <div class="stats" id="stats"></div>
+                <div class="panel">
+                    <div class="panel-head">
+                        <h2>Đăng ký gần đây</h2><button class="text-button" data-view="dangky">Xem tất cả <span
+                                data-icon="arrow"></span></button>
+                    </div>
+                    <div id="recent"></div>
+                </div>
+            </section>
+            <section id="manager" class="manager-grid" hidden>
+                <div class="panel records-panel">
+                    <div class="toolbar">
+                        <h2 id="list-title">Danh sách</h2>
+                        <div class="search-box"><span data-icon="search"></span><input id="search" type="search"
+                                placeholder="Tìm trong danh sách" aria-label="Tìm kiếm"></div>
+                    </div>
+                    <div id="table" aria-live="polite"></div>
+                    <div id="list-count" class="list-count"></div>
+                </div>
+                <div class="panel detail-panel">
+                    <section id="record-detail" aria-label="Chi tiết bản ghi"></section>
+                    <div class="editor">
+                        <h2 id="form-title">Thêm mới</h2>
+                        <form id="entity-form"></form>
+                    </div>
+                </div>
+            </section>
+            <section id="architecture-view" hidden>
+                <div class="panel architecture">
+                    <div class="panel-head">
+                        <h2>Client → API Gateway → Dịch vụ → SQLite</h2>
+                    </div>
+                    <div class="gateway"><strong>Giao diện web & API Gateway</strong><small>:3000 ·
+                            /api/:service</small></div>
+                    <div class="service-grid" id="services"></div>
+                    <p class="architecture-note muted">Đăng ký xác thực sinh viên và đề tài qua HTTP. Mỗi dịch vụ sở hữu
+                        một cơ sở dữ liệu riêng.</p>
+                </div>
+            </section>
+            <details class="panel api">
+                <summary>Nhật ký API <span class="muted">Yêu cầu và phản hồi qua Gateway</span></summary>
+                <pre id="result">Chưa có thao tác. Chọn một bản ghi để xem phản hồi API.</pre>
+            </details>
+        </div>
+    </main>
+    <dialog id="delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-description">
+        <form method="dialog">
+            <div class="dialog-heading"><span class="delete-icon" data-icon="trash"></span>
+                <h2 id="delete-title">Xóa bản ghi?</h2>
+            </div>
+            <p id="delete-description"></p>
+            <div class="dialog-actions"><button value="cancel" autofocus>Hủy</button><button value="delete"
+                    class="danger">Xóa bản ghi</button></div>
+        </form>
+    </dialog>
+</body>
+
+</html>

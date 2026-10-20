@@ -29,6 +29,7 @@ app.get('/dangky/:maDK', (req, res) => {
 app.post('/dangky', async (req, res) => {
   required(req.body, ['maSV', 'maDT']);
   const { maSV, maDT } = req.body;
+  //Kiễm tra xem mã sinh viên và mã đề tài có tồn tại hay không bằng cách gọi API của dịch vụ Sinh viên và Đề tài.
   await checkReferences(maSV, maDT);
   const maDK = `DK-${randomUUID()}`;
   db.prepare('INSERT INTO DANGKY VALUES (?, ?, ?, ?)').run(maDK, maSV, maDT, new Date().toISOString());
